@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Permainan mencocokkan gambar untuk anak usia 3 tahun ke atas.">
+<title>Cocok-Cocokan Si Kecil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Layout: one-screen playroom — theme chips on top, big picture card, tappable answers below */
+:root{
+  --bg:#EAF6F3; --surface:#FFFFFF; --ink:#1E3A44; --soft:#5C7A83;
+  --sun:#FFC83D; --sea:#2BA8A0; --berry:#F0567A; --line:#CFE6E1;
+  --good:#3BB273; --sil:brightness(0) opacity(.85); --display:"Baloo 2", "Nunito", system-ui, sans-serif; --body:"Nunito", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13262C; --surface:#1D3840; --ink:#F2FAF8; --soft:#A9C6CC;
+  --sun:#FFD25E; --sea:#4CC7BE; --berry:#FF7A98; --line:#2C4C55; --good:#55CC8C; --sil:brightness(0) invert(1) opacity(.9); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13262C; --surface:#1D3840; --ink:#F2FAF8; --soft:#A9C6CC;
+  --sun:#FFD25E; --sea:#4CC7BE; --berry:#FF7A98; --line:#2C4C55; --good:#55CC8C; --sil:brightness(0) invert(1) opacity(.9); color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);padding-inline:16px;padding-block:12px 20px;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+*{box-sizing:border-box}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,5vw,2.2rem);margin:0;line-height:1;color:var(--sea);text-wrap:balance}
+h1 span{color:var(--berry)}
+.tools{display:flex;gap:8px}
+.pill{font:800 .85rem var(--body);border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:#fff}
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.theme{line-height:1.15;text-align:center}
+.theme{border:3px solid transparent;background:var(--surface);border-radius:20px;padding:8px 4px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink);font:800 .78rem var(--body);min-width:0}
+.theme .ic{font-size:2rem;line-height:1.1}
+.theme[aria-pressed="true"]{border-color:var(--sun);box-shadow:0 4px 0 var(--sun)}
+.progress{display:flex;justify-content:center;gap:6px;font-size:1.6rem;min-height:2rem}
+.progress i{font-style:normal;filter:grayscale(1);opacity:.3;transition:transform .3s}
+.progress i.on{filter:none;opacity:1;transform:scale(1.15)}
+.stage{background:var(--surface);border-radius:28px;padding:18px 14px 22px;display:flex;flex-direction:column;align-items:center;gap:12px;border:3px solid var(--line)}
+.target{width:min(44vw,180px);aspect-ratio:1;max-width:100%;border-radius:28px;background:var(--bg);display:grid;place-items:center;font-size:min(26vw,108px);line-height:1;border:4px dashed var(--sea);cursor:pointer}
+.target svg,.choice svg{width:72%;height:72%}
+.ask{font-family:var(--display);font-weight:800;font-size:clamp(1.2rem,4.5vw,1.6rem);margin:0;color:var(--ink);text-align:center}
+.ask small{display:block;font:600 .9rem var(--body);color:var(--soft)}
+.choices{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;width:100%}
+.choice{width:min(27vw,140px);aspect-ratio:1;max-width:100%;border-radius:24px;border:4px solid var(--line);background:var(--bg);display:grid;place-items:center;font-size:min(16vw,80px);line-height:1;cursor:pointer;transition:transform .15s}
+.choice:active{transform:scale(.94)}
+.choice:focus-visible,.theme:focus-visible,.pill:focus-visible,.big:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.choice.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 18%,var(--bg));animation:pop .5s}
+.choice.wrong{animation:shake .45s;opacity:.35}
+.choice.dim{opacity:.25}
+@keyframes pop{50%{transform:scale(1.18) rotate(-4deg)}}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.sil{filter:var(--sil)}
+.cnt{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:.04em;width:88%;line-height:1.05}
+.cnt.n1{font-size:1em}.cnt.n2{font-size:.62em}.cnt.n3,.cnt.n4{font-size:.5em}.cnt.n5{font-size:.42em}
+.say{min-height:1.6em;font:800 1.1rem var(--body);color:var(--good);text-align:center;margin:0}
+.note{font-size:.82rem;color:var(--soft);text-align:center;margin:0;line-height:1.5;max-width:60ch;align-self:center}
+.party{position:fixed;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 82%,transparent);z-index:5;padding:16px}
+.party .box{background:var(--surface);border-radius:32px;padding:28px 24px;text-align:center;border:4px solid var(--sun);max-width:340px;width:100%}
+.party .big-emoji{font-size:5rem;line-height:1;animation:pop 1s infinite}
+.party h2{font-family:var(--display);font-size:2rem;margin:8px 0 4px;color:var(--berry)}
+.party p{margin:0 0 16px;color:var(--soft);font-weight:600}
+.big{font:800 1.2rem var(--display);background:var(--sea);color:#fff;border:0;border-radius:999px;padding:12px 28px;cursor:pointer;box-shadow:0 5px 0 color-mix(in srgb,var(--sea) 60%,#000)}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:6;width:100%;height:100%}
+@media (max-width:420px){.theme{font-size:.7rem}.theme .ic{font-size:1.7rem}.choices{gap:10px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <h1>Cocok-<span>Cocokan</span></h1>
+    <div class="tools">
+      <button class="pill" id="level" aria-pressed="false">Pilihan: 2</button>
+      <button class="pill" id="sound" aria-pressed="true">Suara: Nyala</button>
+    </div>
+  </header>
+
+  <nav class="themes" id="themes" aria-label="Pilih tema"></nav>
+
+  <div class="progress" id="progress" aria-label="Bintang"></div>
+
+  <main class="stage">
+    <button class="target" id="target" aria-label="Gambar utama"></button>
+    <p class="ask" id="ask"></p>
+    <div class="choices" id="choices"></div>
+    <p class="say" id="say" aria-live="polite"></p>
+  </main>
+
+  <p class="note">Untuk orang tua: ketuk gambar besar untuk mendengar namanya. Mulai dengan 2 pilihan, lalu naikkan ke 3 saat si kecil sudah lancar. Sebut nama bendanya bersama-sama dan tunjuk pasangannya sebelum anak mengetuk.</p>
+</div>
+
+<div class="party" id="party" hidden>
+  <div class="box">
+    <div class="big-emoji">🏆</div>
+    <h2>Hebat sekali!</h2>
+    <p>5 bintang terkumpul</p>
+    <button class="big" id="again">Main lagi</button>
+  </div>
+</div>
+<canvas id="fx"></canvas>
+
+<script>
+const SHAPES={
+  lingkaran:'<circle cx="50" cy="50" r="42"/>',
+  kotak:'<rect x="10" y="10" width="80" height="80" rx="8"/>',
+  segitiga:'<path d="M50 8 L94 88 L6 88 Z"/>',
+  bintang:'<path d="M50 6 L62 38 L96 38 L68 58 L79 92 L50 72 L21 92 L32 58 L4 38 L38 38 Z"/>',
+  hati:'<path d="M50 88 C10 60 4 34 22 20 C36 10 48 18 50 28 C52 18 64 10 78 20 C96 34 90 60 50 88 Z"/>'
+};
+const COLORS={merah:'#E8413C',biru:'#2F7DE1',kuning:'#F5C211',hijau:'#2FA84F',ungu:'#8E4BD6'};
+const shape=(s,c)=>({svg:`<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="${COLORS[c]}">${SHAPES[s]}</g></svg>`,n:`${s} ${c}`});
+const same=(e,n)=>({a:{e,n},b:{e,n},say:`Ini ${n}!`,same:1});
+
+const THEMES=[
+ {id:'hewan',ic:'🐰',label:'Hewan',ask:'Apa makanannya?',pairs:[
+  {a:{e:'🐰',n:'kelinci'},b:{e:'🥕',n:'wortel'},say:'Kelinci suka makan wortel!'},
+  {a:{e:'🐒',n:'monyet'},b:{e:'🍌',n:'pisang'},say:'Monyet suka makan pisang!'},
+  {a:{e:'🐭',n:'tikus'},b:{e:'🧀',n:'keju'},say:'Tikus suka makan keju!'},
+  {a:{e:'🐶',n:'anjing'},b:{e:'🦴',n:'tulang'},say:'Anjing suka tulang!'},
+  {a:{e:'🐱',n:'kucing'},b:{e:'🐟',n:'ikan'},say:'Kucing suka makan ikan!'},
+  {a:{e:'🐝',n:'lebah'},b:{e:'🌻',n:'bunga'},say:'Lebah suka bunga!'},
+  {a:{e:'🐼',n:'panda'},b:{e:'🎋',n:'bambu'},say:'Panda suka makan bambu!'},
+  {a:{e:'🐻',n:'beruang'},b:{e:'🍯',n:'madu'},say:'Beruang suka madu!'},
+  {a:{e:'🐔',n:'ayam'},b:{e:'🌽',n:'jagung'},say:'Ayam suka makan jagung!'},
+  {a:{e:'🐿️',n:'tupai'},b:{e:'🌰',n:'kacang'},say:'Tupai suka makan kacang!'}
+ ]},
+ {id:'buah',ic:'🍎',label:'Buah & Sayur',ask:'Mana yang sama?',pairs:[
+  same('🍎','apel'),same('🍌','pisang'),same('🍇','anggur'),same('🍉','semangka'),same('🍊','jeruk'),
+  same('🍓','stroberi'),same('🥕','wortel'),same('🌽','jagung'),same('🍅','tomat'),same('🥦','brokoli'),
+  same('🍍','nanas'),same('🍆','terong')
+ ]},
+ {id:'bentuk',ic:'🔺',label:'Warna & Bentuk',ask:'Mana yang sama?',shapes:1,pairs:[]},
+ {id:'benda',ic:'🧦',label:'Benda',ask:'Apa pasangannya?',pairs:[
+  {a:{e:'🧦',n:'kaus kaki'},b:{e:'👟',n:'sepatu'},say:'Kaus kaki dan sepatu!'},
+  {a:{e:'🔑',n:'kunci'},b:{e:'🔒',n:'gembok'},say:'Kunci untuk gembok!'},
+  {a:{e:'☂️',n:'payung'},b:{e:'🌧️',n:'hujan'},say:'Pakai payung kalau hujan!'},
+  {a:{e:'✏️',n:'pensil'},b:{e:'📝',n:'kertas'},say:'Pensil untuk menulis di kertas!'},
+  {a:{e:'🍽️',n:'piring'},b:{e:'🥄',n:'sendok'},say:'Makan pakai piring dan sendok!'},
+  {a:{e:'🪥',n:'sikat gigi'},b:{e:'🦷',n:'gigi'},say:'Sikat gigi supaya gigi bersih!'},
+  {a:{e:'🍼',n:'botol susu'},b:{e:'👶',n:'bayi'},say:'Bayi minum susu dari botol!'},
+  {a:{e:'⚽',n:'bola'},b:{e:'🥅',n:'gawang'},say:'Tendang bola ke gawang!'},
+  {a:{e:'🧼',n:'sabun'},b:{e:'🛁',n:'bak mandi'},say:'Mandi pakai sabun!'},
+  {a:{e:'🎂',n:'kue ulang tahun'},b:{e:'🕯️',n:'lilin'},say:'Tiup lilin di kue ulang tahun!'}
+ ]}
+
+ ,{id:'bayangan',ic:'👤',label:'Bayangan',ask:'Mana bayangannya?',pairs:
+  [['🐘','gajah'],['🦒','jerapah'],['🐢','kura-kura'],['🦋','kupu-kupu'],['🐌','siput'],['🦀','kepiting'],
+   ['🐟','ikan'],['🐓','ayam jago'],['🦕','dinosaurus'],['🐫','unta'],['🦆','bebek'],['🐇','kelinci'],
+   ['🚲','sepeda'],['☂️','payung'],['🎸','gitar'],['🍐','pir']]
+  .map(([e,n])=>({a:{e,n},b:{e,n:'bayangan '+n,sil:1},say:`Itu bayangan ${n}!`}))}
+ ,{id:'kendaraan',ic:'🚗',label:'Kendaraan',ask:'Di mana tempatnya?',pairs:[
+  {a:{e:'✈️',n:'pesawat'},b:{e:'☁️',n:'langit'},say:'Pesawat terbang di langit!'},
+  {a:{e:'🚢',n:'kapal'},b:{e:'🌊',n:'laut'},say:'Kapal berlayar di laut!'},
+  {a:{e:'🚂',n:'kereta api'},b:{e:'🛤️',n:'rel'},say:'Kereta api jalan di atas rel!'},
+  {a:{e:'🚗',n:'mobil'},b:{e:'🛣️',n:'jalan raya'},say:'Mobil jalan di jalan raya!'},
+  {a:{e:'🚀',n:'roket'},b:{e:'🌙',n:'bulan'},say:'Roket terbang ke bulan!'},
+  {a:{e:'🚒',n:'mobil pemadam'},b:{e:'🔥',n:'api'},say:'Mobil pemadam memadamkan api!'},
+  {a:{e:'🚑',n:'ambulans'},b:{e:'🏥',n:'rumah sakit'},say:'Ambulans pergi ke rumah sakit!'},
+  {a:{e:'🚌',n:'bus'},b:{e:'🚏',n:'halte'},say:'Bus berhenti di halte!'},
+  {a:{e:'🚜',n:'traktor'},b:{e:'🌾',n:'sawah'},say:'Traktor bekerja di sawah!'}
+ ]}
+ ,{id:'hitung',ic:'🖐️',label:'Berapa Banyak?',ask:'Mana yang sama banyak?',pairs:[]}
+ ,{id:'perasaan',ic:'😊',label:'Perasaan',ask:'Mana yang sama?',pairs:
+  [['😊','senang'],['😢','sedih'],['😠','marah'],['😲','kaget'],['😴','mengantuk'],['😂','tertawa'],['😨','takut'],['🤒','sakit']]
+  .map(([e,n])=>({a:{e,n:'wajah '+n},b:{e,n:'wajah '+n},say:`Ini wajah ${n}!`}))}
+];
+// counting pairs
+const NUM=['','satu','dua','tiga','empat','lima'];
+const COUNT_ITEMS=[['🍎','apel'],['🍌','pisang'],['🐤','anak ayam'],['🚗','mobil'],['🌸','bunga'],['🐟','ikan']];
+const hitung=THEMES.find(t=>t.id==='hitung');
+for(let k=1;k<=5;k++)for(const [e,n] of COUNT_ITEMS)
+  hitung.pairs.push({a:{e,cnt:k,n:`${NUM[k]} ${n}`},b:{e:'🔵',cnt:k,n:NUM[k]},
+    say:`Ada ${NUM[k]} ${n}! `+NUM.slice(1,k+1).join(', ')});
+// build shape pairs: each shape+color combo
+for(const s of Object.keys(SHAPES)) for(const c of Object.keys(COLORS)){
+  const it=shape(s,c); THEMES[2].pairs.push({a:it,b:it,say:`Ini ${it.n}!`,same:1,s,c});
+}
+
+let theme=THEMES[0], nChoices=2, soundOn=true, stars=0, locked=false, current=null, lastIdx=-1;
+const $=id=>document.getElementById(id);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const face=it=>{
+  if(it.svg)return it.svg;
+  if(it.cnt)return `<span class="cnt n${it.cnt}">${Array(it.cnt).fill(`<span>${it.e}</span>`).join('')}</span>`;
+  if(it.sil)return `<span class="sil">${it.e}</span>`;
+  return it.e;
+};
+
+// sound
+let ac=null;
+function tone(freqs,dur=.14,type='sine'){
+  if(!soundOn)return;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    freqs.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;
+      const t=ac.currentTime+i*dur;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+dur+.02)});
+  }catch(e){}
+}
+function speak(text){
+  if(!soundOn)return;
+  try{const u=new SpeechSynthesisUtterance(text);u.lang='id-ID';u.rate=.85;u.pitch=1.2;
+    const v=speechSynthesis.getVoices().find(v=>/^id/i.test(v.lang));if(v)u.voice=v;
+    speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
+}
+
+function renderThemes(){
+  $('themes').innerHTML='';
+  THEMES.forEach(t=>{const b=document.createElement('button');b.className='theme';b.id='theme-'+t.id;
+    b.setAttribute('aria-pressed',t===theme);b.innerHTML=`<span class="ic">${t.ic}</span>${t.label}`;
+    b.onclick=()=>{theme=t;stars=0;lastIdx=-1;renderThemes();renderProgress();round();tone([660],.08)};
+    $('themes').appendChild(b)});
+}
+function renderProgress(){
+  $('progress').innerHTML=Array.from({length:5},(_,i)=>`<i class="${i<stars?'on':''}">⭐</i>`).join('');
+}
+function pickDistractors(p){
+  let pool=theme.pairs.filter(q=>q.b.n!==p.b.n);
+  if(theme.shapes) pool=pool.filter(q=>q.s!==p.s&&q.c!==p.c); // differ in both shape and colour
+  const out=[],seen=new Set();
+  for(const q of shuffle(pool.slice())){if(seen.has(q.b.n))continue;seen.add(q.b.n);out.push(q.b);if(out.length>=nChoices-1)break}
+  return out;
+}
+function round(){
+  locked=false;$('say').textContent='';
+  let i;do{i=Math.random()*theme.pairs.length|0}while(i===lastIdx&&theme.pairs.length>1);lastIdx=i;
+  current=theme.pairs[i];
+  $('target').innerHTML=face(current.a);$('target').setAttribute('aria-label',current.a.n);
+  $('ask').innerHTML=`${theme.ask}<small>${current.a.n}</small>`;
+  const opts=shuffle([current.b,...pickDistractors(current)]);
+  $('choices').innerHTML='';
+  opts.forEach((o,k)=>{const b=document.createElement('button');b.className='choice';b.id='choice-'+k;
+    b.innerHTML=face(o);b.setAttribute('aria-label',o.n);
+    b.onclick=()=>answer(b,o);$('choices').appendChild(b)});
+}
+function answer(btn,o){
+  if(locked)return;
+  if(o.n===current.b.n){
+    locked=true;btn.classList.add('right');
+    [...$('choices').children].forEach(c=>{if(c!==btn)c.classList.add('dim')});
+    $('say').textContent=current.say;tone([523,659,784],.12);
+    setTimeout(()=>speak(current.say),250);burst(btn);
+    stars++;renderProgress();
+    setTimeout(()=>{if(stars>=5){$('party').hidden=false;tone([523,659,784,1047],.16);speak('Hebat sekali!');burst(null,90)}else round()},2000);
+  }else{
+    btn.classList.add('wrong');tone([300,240],.12,'triangle');speak('Coba lagi ya');
+    setTimeout(()=>btn.classList.remove('wrong'),600);
+  }
+}
+
+// confetti
+const cv=$('fx'),cx=cv.getContext('2d');let parts=[];
+function burst(el,n=40){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  cv.width=innerWidth;cv.height=innerHeight;
+  const r=el?el.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2,width:0,height:0};
+  const x=r.left+r.width/2,y=r.top+r.height/2,cols=['#FFC83D','#2BA8A0','#F0567A','#3BB273','#2F7DE1'];
+  for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*10,vy:-Math.random()*10-3,s:6+Math.random()*6,c:cols[i%5],life:70});
+  if(parts.length===n)requestAnimationFrame(tick);
+}
+function tick(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.life--;cx.fillStyle=p.c;cx.fillRect(p.x,p.y,p.s,p.s)});
+  parts=parts.filter(p=>p.life>0);if(parts.length)requestAnimationFrame(tick);else cx.clearRect(0,0,cv.width,cv.height);
+}
+
+$('target').onclick=()=>{speak(current.a.n);tone([600],.08)};
+$('level').onclick=()=>{nChoices=nChoices===2?3:2;$('level').textContent='Pilihan: '+nChoices;
+  $('level').setAttribute('aria-pressed',nChoices===3);round()};
+$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent='Suara: '+(soundOn?'Nyala':'Mati');
+  $('sound').setAttribute('aria-pressed',soundOn);try{speechSynthesis.cancel()}catch(e){}};
+$('again').onclick=()=>{$('party').hidden=true;stars=0;renderProgress();round()};
+
+renderThemes();renderProgress();round();
+</script>
+
+</body>
+</html>
